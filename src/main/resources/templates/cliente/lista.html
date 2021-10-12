@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" lang="pt"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta charset="UTF-8" />
+</head>
+<body>
+	<section class="layout-content" layout:fragment="corpo">
+		<nav class="navbar navbar-expand-md bg-light">
+			<div class="collapse navbar-collapse" id="navbarsExampleDefault">
+				<ul class="navbar-nav mr-auto">
+					<li class="nav-item active"><i class="oi oi-caret-right"></i>
+						<span>Lista de Clientes</span></li>
+				</ul>
+				<a class="btn btn-primary btn-md" href="/clientes/cadastrar"
+					role="button"> <span class="oi oi-plus" title="Cadastro"
+					aria-hidden="true"></span> <span>Cadastrar Clientes</span>
+				</a>
+			</div>
+		</nav>
+
+		<div class="container">
+
+			<p>
+				<i class="oi oi-magnifying-glass"></i><span></span>
+				<button class="btn btn-primary" type="button" data-toggle="collapse"
+					data-target="#collapseNome" aria-controls="collapseNome">Nome</button>
+
+				<button class="btn btn-primary" type="button" data-toggle="collapse"
+					data-target="#collapseData" aria-controls="collapseData">Datas</button>
+			</p>
+			<div class="row">
+				<div class="col">
+					<div class="collapse" id="collapseNome">
+
+						<nav class="navbar navbar-light bg-light">
+							<form class="form-inline" method="GET"
+								th:action="@{/clientes/buscar/nome}">
+								<input class="form-control mr-sm-2" type="search"
+									placeholder="nome" aria-label="Search" th:name="nome" />
+								<button class="btn btn-outline-success my-2 my-sm-0">Search</button>
+							</form>
+						</nav>
+
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+					<div class="collapse" id="collapseCargo">
+
+						<nav class="navbar navbar-light bg-light"></nav>
+
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+					<div class="collapse" id="collapseData">
+
+						<nav class="navbar navbar-light bg-light">
+							<form class="form-inline" method="GET"
+								th:action="@{/clientes/buscar/data}">
+								<input class="form-control mr-sm-2" type="date"
+									aria-label="Search" th:name="nascimento" />
+
+								<button class="btn btn-outline-success my-2 my-sm-0">Search</button>
+							</form>
+						</nav>
+
+					</div>
+				</div>
+			</div>
+
+
+			<div class="table-responsive">
+				<table class="table table-striped table-hover table-sm">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th><a
+								th:href="@{'/clientes/page/' + ${currentPage} + '?sortField=nome&sortDir=' + ${reverseSortDir}}">Nome</a>
+							</th>
+							<th><a
+								th:href="@{'/clientes/page/' + ${currentPage} + '?sortField=renda&sortDir=' + ${reverseSortDir}}">Renda</a>
+							</th>
+
+
+							<th>Endereço</th>
+							<th><a
+								th:href="@{'/clientes/page/' + ${currentPage} + '?sortField=dataNascimento&sortDir=' + ${reverseSortDir}}">Data
+									de Nascimento</a></th>
+
+							<th>Ação</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="item : ${clientes}">
+							<td th:text="${item.id}"></td>
+							<td th:text="${item.nome}"></td>
+							<td th:text="|R$ ${{item.renda}}|"></td>
+
+
+							<td>
+								<button type="button" class="btn btn-secondary btn-sm"
+									data-container="body" data-toggle="popover" title="Endereço"
+									th:attr="data-content=${#strings.concat(
+										item.endereco.logradouro, ', ',
+										item.endereco.numero, ' ',
+										item.endereco.complemento, ' - ', 
+										item.endereco.bairro, ', ',
+										item.endereco.cidade, ' - ',
+										item.endereco.uf.sigla, ' - ',
+										item.endereco.cep)}">
+									<span class="oi oi-eye" title="Visualizar" aria-hidden="true"></span>
+								</button>
+							</td>
+							<td
+								th:text="${#temporals.format(item.dataNascimento, 'dd/MM/yyyy')}"></td>
+
+							<td colspan="2"><a class="btn btn-info btn-sm"
+								th:href="@{/clientes/editar/{id} (id=${item.id})}" role="button">
+									<span class="oi oi-brush" title="Editar" aria-hidden="true"></span>
+							</a>
+								<button th:id="${'btn_clientes/excluir/' + item.id}"
+									type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+									data-target="#myModal">
+									<span class="oi oi-circle-x" title="Excluir" aria-hidden="true"></span>
+								</button></td>
+						</tr>
+
+					</tbody>
+				</table>
+
+				<div th:if="${totalPages > 1}">
+					<div class="row col-sm-10">
+						<div class="col-sm-3">Total de Registros: [[${totalItems}]]
+						</div>
+
+
+
+						<div class="col-sm-2">
+							<span th:each="i : ${#numbers.sequence(1, totalPages)}"> <a
+								th:if="${currentPage != i}"
+								th:href="@{'/clientes/page/' + ${i} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}}">[[${i}]]</a>
+								<span th:unless="${currentPage != i}">[[${i}]]</span> &nbsp;
+								&nbsp;
+							</span>
+						</div>
+						<div class="col-sm-2">
+							<a th:if="${currentPage < totalPages}"
+								th:href="@{'/clientes/page/' + ${currentPage + 1} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}}">Próximo</a>
+							<span th:unless="${currentPage < totalPages}">Próximo</span>
+						</div>
+						<div class="col-sm-2">
+							<a th:if="${currentPage < totalPages}"
+								th:href="@{'/clientes/page/' + ${totalPages}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}}">Último</a>
+							<span th:unless="${currentPage < totalPages}">Último</span>
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+
+		<div th:replace="fragments/modal :: modal"></div>
+
+	</section>
+
+</body>
+</html>
